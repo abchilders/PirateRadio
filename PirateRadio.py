@@ -56,12 +56,6 @@ def play_songs(file_list):
 	print("Shuffle is " + on_off[shuffle])
 	print("Repeat All is " + on_off[repeat_all])
 	# print("Stereo playback is " + on_off[play_stereo])
-	'''
-	# Shay's attempt 2
-	for filename in file_list:
-		print("Playing " + str(filename))
-		os.system("./pifm " + str(filename) + " " + str(frequency) + " 8000 stereo")
-	'''
 	if shuffle == True:
 		random.shuffle(file_list)
 	with open(os.devnull, "w") as dev_null:
@@ -87,7 +81,6 @@ def read_config():
 		frequency = config.get("pirateradio",'frequency')
 		shuffle = config.getboolean("pirateradio",'shuffle',fallback=False)
 		repeat_all = config.getboolean("pirateradio",'repeat_all', fallback=False)
-		#repeat_all = False
 
 
 def daemonize():
