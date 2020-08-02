@@ -2,30 +2,24 @@
 # Pirate Radio
 # Author: Wynter Woods (Make Magazine)
 
-try:	# the following tests for a python3.x module
-	import configparser
-except: # if the module isn't found, we're likely running python2.x and will just trick it into working
-	import ConfigParser as configparser
-finally:
-	import re
-	import re
-	import random
-	import sys
-	import os
-	import threading
-	import time
-	import subprocess
+import os
+import sys
+import subprocess
+import configparser
+import re
+import random
+import threading
+import time
+
 
 fm_process = None
 on_off = ["off", "on"]
-config_location = "/pirateradio/pirateradio.conf"
 
 frequency = 87.9
 shuffle = False
 repeat_all = False
 merge_audio_in = False
 play_stereo = True
-music_dir = "/pirateradio"
 
 music_pipe_r,music_pipe_w = os.pipe()
 microphone_pipe_r,microphone_pipe_w = os.pipe()
@@ -45,11 +39,11 @@ def main():
 
 def build_file_list():
 	file_list = []
-	for root, folders, files in os.walk(music_dir):
+	for root, folders, files in os.walk("/root/music/"):
 		folders.sort()
 		files.sort()
 		for filename in files:
-			if re.search(".(aac|mp3|wav|flac|m4a|ogg|pls|m3u)$", filename) != None: 
+			if re.search(".(aac|mp3|wav|flac|m4a)$", filename) != None:
 				file_list.append(os.path.join(root, filename))
 	return file_list
 
@@ -57,27 +51,23 @@ def build_file_list():
 
 def play_songs(file_list):
 	print("Playing songs to frequency ", str(frequency))
+	print("Songs: ")
+	print(file_list)
 	print("Shuffle is " + on_off[shuffle])
 	print("Repeat All is " + on_off[repeat_all])
 	# print("Stereo playback is " + on_off[play_stereo])
-	
+	'''
+	# Shay's attempt 2
+	for filename in file_list:
+		print("Playing " + str(filename))
+		os.system("./pifm " + str(filename) + " " + str(frequency) + " 8000 stereo")
+	'''
 	if shuffle == True:
 		random.shuffle(file_list)
 	with open(os.devnull, "w") as dev_null:
 		for filename in file_list:
 			print("Playing ",filename)
-			if re.search(".pls$", filename) != None:
-				streamurl = parse_pls(filename, 1)
-				if streamurl != None:
-					print("streaming radio from " + streamurl)
-					subprocess.call(["ffmpeg","-i",streamurl,"-f","s16le","-acodec","pcm_s16le","-ac", "2" if play_stereo else "1" ,"-ar","44100","-"],stdout=music_pipe_w, stderr=dev_null)
-			elif re.search(".m3u$", filename) != None:
-				streamurl = parse_m3u(filename, 1)
-				if streamurl != None:
-					print("streaming radio from " + streamurl)
-					subprocess.call(["ffmpeg","-i",streamurl,"-f","s16le","-acodec","pcm_s16le","-ac", "2" if play_stereo else "1" ,"-ar","44100","-"],stdout=music_pipe_w, stderr=dev_null)
-			else:
-				subprocess.call(["ffmpeg","-i",filename,"-f","s16le","-acodec","pcm_s16le","-ac", "2" if play_stereo else "1" ,"-ar","44100","-"],stdout=music_pipe_w, stderr=dev_null)
+			subprocess.call(["ffmpeg","-i",filename,"-f","s16le","-acodec","pcm_s16le","-ac", "2" if play_stereo else "1" ,"-ar","44100","-"],stdout=music_pipe_w, stderr=dev_null)
 
 
 
@@ -86,10 +76,9 @@ def read_config():
 	global shuffle
 	global repeat_all
 	global play_stereo
-	global music_dir
 	try:
 		config = configparser.ConfigParser()
-		config.read(config_location)
+		config.read("/pirateradio/pirateradio.config")
 		
 	except:
 		print("Error reading from config file.")
@@ -98,46 +87,8 @@ def read_config():
 		frequency = config.get("pirateradio",'frequency')
 		shuffle = config.getboolean("pirateradio",'shuffle',fallback=False)
 		repeat_all = config.getboolean("pirateradio",'repeat_all', fallback=False)
-		music_dir = config.get("pirateradio", 'music_dir', fallback="/pirateradio")
+		#repeat_all = False
 
-def parse_pls(src, titleindex):
-	# breaking up the pls file in separate strings
-	lines = []
-	with open( src, "r" ) as f:
-		lines = f.readlines()
-
-	# and parse the lines
-	if lines != None:
-		for line in lines:
-			# search for the URI
-			match = re.match( "^[ \\t]*file" + str(titleindex) + "[ \\t]*=[ \\t]*(.*$)", line, flags=re.IGNORECASE )
-			if match != None:
-				if match.group( 1 ) != None:
-				# URI found, it's saved in the second match group
-				# output the URI to the destination file
-					return match.group( 1 )
-		
-	return None
-		
-def parse_m3u(src, titleindex):
-	# create a list of strings, one per line in the source file
-	lines = []
-	searchindex = int(1)
-	with open( src, "r" ) as f:
-  		  lines = f.readlines()
-
-	if lines != None:
-		for line in lines:
-		# search for the URI
-			if '://' in line:
-				if searchindex == titleindex:
-					return line
-				else:
-					searchindex += 1
-		
-	return None
-			
-	
 
 def daemonize():
 	fpid=os.fork()
