@@ -2,22 +2,27 @@
 # Pirate Radio
 # Author: Wynter Woods (Make Magazine)
 
-import os
-import sys
-import subprocess
-import configparser
-import re
-import random
-import threading
-import time
+try:
+	# the following tests for a python3.x module
+	import configparser
+except: # if the module isn't found, we're likely running python2.x and will just trick it into working
+	import ConfigParser as configparser
+finally:
+	import os
+	import sys
+	import subprocess
+	import re
+	import random
+	import threading
+	import time
 
 
 fm_process = None
 on_off = ["off", "on"]
 
-frequency = 87.9
+frequency = 98.7
 shuffle = False
-repeat_all = False
+repeat_all = True
 merge_audio_in = False
 play_stereo = True
 
@@ -51,18 +56,29 @@ def build_file_list():
 
 def play_songs(file_list):
 	print("Playing songs to frequency ", str(frequency))
-	print("Songs: ")
-	print(file_list)
+	# print("Songs: ")
+	# print(file_list)
 	print("Shuffle is " + on_off[shuffle])
 	print("Repeat All is " + on_off[repeat_all])
 	# print("Stereo playback is " + on_off[play_stereo])
 	if shuffle == True:
 		random.shuffle(file_list)
+
+	# load start message and create audio file
+	start_file = open('/root/tags/start.txt', 'r')
+	start_line = (start_file.readline()).strip() + " " + str(frequency) + " FM."
+	print("read " + start_line)
+	command = 'python /root/tags/espeak_wav_maker.py {}'.format(start_line)
+	print(command)
+	os.system('python /root/tags/espeak_wav_maker.py {}'.format(start_line))
+
+	# create tags with station name and add to song list
 	with open(os.devnull, "w") as dev_null:
 		for filename in file_list:
 			print("Playing ",filename)
 			subprocess.call(["ffmpeg","-i",filename,"-f","s16le","-acodec","pcm_s16le","-ac", "2" if play_stereo else "1" ,"-ar","44100","-"],stdout=music_pipe_w, stderr=dev_null)
-
+			# doesn't work here bc idk but if you want to play the output of ffmpeg while still piping to stdout you do it by piping to tee like this
+			#subprocess.call(["tee",">(aplay","-f","cd)"],stdin=speaker_pipe_r,stdout=music_pipe_w,stderr=dev_null)
 
 
 def read_config():
@@ -72,8 +88,7 @@ def read_config():
 	global play_stereo
 	try:
 		config = configparser.ConfigParser()
-		config.read("/pirateradio/pirateradio.config")
-		
+		config.read("/pirateradio/pirateradio.conf")
 	except:
 		print("Error reading from config file.")
 	else:
@@ -81,6 +96,7 @@ def read_config():
 		frequency = config.get("pirateradio",'frequency')
 		shuffle = config.getboolean("pirateradio",'shuffle',fallback=False)
 		repeat_all = config.getboolean("pirateradio",'repeat_all', fallback=False)
+		#repeat_all = False
 
 
 def daemonize():
@@ -102,7 +118,6 @@ def run_pifm(use_audio_in=False):
 	global fm_process
 	with open(os.devnull, "w") as dev_null:
 		fm_process = subprocess.Popen(["/root/pifm","-",str(frequency),"44100", "stereo" if play_stereo else "mono"], stdin=music_pipe_r, stdout=dev_null)
-
 		#if use_audio_in == False:
 		#else:
 		#	fm_process = subprocess.Popen(["/root/pifm2","-",str(frequency),"44100"], stdin=microphone_pipe_r, stdout=dev_null)
