@@ -16,18 +16,19 @@ Step #2: Flash the SD card and add music.
 -----------------------------------------
 * When downloading MAKE Labs's disk image, first extract the .zip file you download. Then change the file extension from .iso to .img *before* flashing it to your SD card. 
 * When adding music: 
-    1. On the Raspberry Pi end: Make sure it's plugged into your LAN. You'll need some way to interface with the Raspberry Pi once the new SD card is inserted; you can't go headless right away. Create a "music" directory in root's home directory (so /root/music) and place all your music files there. The original script, contrary to tutorial directions, searches for music in the pirateradio directory. My edits relocated this search to within the home directory.
+    1. On the Raspberry Pi end: Make sure it's plugged into your LAN (read: use an Ethernet cord to connect your Pi into the router, then do the same with your laptop). You'll need some way to interface with the Raspberry Pi once the new SD card is inserted; you can't go headless right away. Create a "music" directory in root's home directory (so /root/music) and place all your music files there. The original script, contrary to tutorial directions, searches for music in the pirateradio directory. My edits relocated this search to within the home directory. (**except in home directory backup where that experimental copy of PirateRadio.py DOES look in a Music folder)
     2. SSHing into your Pi: 
         * If `alarmpi.local` can't be reached as an IP address, get your Pi's IP address like so: 
             - Enter `hostname -I` in the command line on your Raspberry Pi. 
             - Use that as your hostname when using WinSCP instead. 
-        * While you're SFTPing into your Pi, make sure to download PirateRadio.py from this repository and replace the copy on your SD card with this one.     
+        * While you're SFTPing into your Pi, make sure to download PirateRadio.py from this repository and replace the copy on your SD card with this one.
+    3. Don't even try editing files directly on your Pi, unless you're starting from scratch with a brand-new SD card. As of 2024-11-29, Alex, your current SD is sliiightly corrupted and crashes when too many commands are input directly into it, but I am choosing not to start from scratch right now. Just use Command Prompt or WinSCP to SSH into your Pi and edit files from your Windows machine.
    
 
 Step #3: Edit the config file. 
 -------------------------------
 * Use [radio-locator](radio-locator.com) to find unused FM frequencies in your area before choosing a frequency to broadcast on. 
-* The original script had weird issues-- either it crashed or it infinitely looped too fast for it to ever play anything. Shay @sk261 fixed this. 
+* The original script had weird issues-- either it crashed or it infinitely looped too fast for it to ever play anything. Shay @sk261 fixed this; you can look at version history to see how she fixed it.  
 
 No tips for Steps 4, 5, or 6. 
 
