@@ -5,7 +5,7 @@ MAKE Raspberry Pi Automated FM Radio Script.
 
 Alex's spicy edits to the original [MAKE tutorial](https://makezine.com/projects/raspberry-pirate-radio/):
 ========================================
-To future Alex: Follow the original MAKE tutorial, but use the suggestions here to make things go smoother. I had a lot of issues with trying to get this tutorial to work on my Raspberry Pi B. Documenting how I got it to work here, as well as adding my edits to the Python script. 
+To future Alex: Follow the original MAKE tutorial, but use the suggestions here to make things go smoother. I had a lot of issues with trying to get this tutorial to work on my Raspberry Pi 1 Model B. Documenting how I got it to work here, as well as adding my edits to the Python script. 
 
 Step #1: Make the antenna.
 --------------------------
@@ -22,7 +22,7 @@ Step #2: Flash the SD card and add music.
             - Enter `hostname -I` in the command line on your Raspberry Pi. 
             - Use that as your hostname when using WinSCP instead. 
         * While you're SFTPing into your Pi, make sure to download PirateRadio.py from this repository and replace the copy on your SD card with this one.
-    3. Don't even try editing files directly on your Pi, unless you're starting from scratch with a brand-new SD card. As of 2024-11-29, Alex, your current SD is sliiightly corrupted and crashes when too many commands are input directly into it, but I am choosing not to start from scratch right now. Just use Command Prompt or WinSCP to SSH into your Pi and edit files from your Windows machine.
+    3. Alex, if you're still using that original and now slightly corrupted SD: don't even try editing files directly on your Pi. It's gonna crash. If you want to edit files on the Pi from your Windows Machine, turn your Pi on, connect it to LAN, then on your Windows machine, use Command Prompt or WinSCP to SSH into your Pi and edit files that way.
    
 
 Step #3: Edit the config file. 
