@@ -20,7 +20,7 @@ finally:
 fm_process = None
 on_off = ["off", "on"]
 
-frequency = 98.7
+frequency = 99.5
 shuffle = False
 repeat_all = True
 merge_audio_in = False
